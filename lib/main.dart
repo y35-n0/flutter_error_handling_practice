@@ -1,8 +1,38 @@
+import 'dart:async';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_test_project/env.dart';
 import 'package:flutter_test_project/core/error_handling/error_handling.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() {
-  runApp(const MyApp());
+  runZoned<Future<void>>(() async {
+    WidgetsFlutterBinding.ensureInitialized();
+
+    await SentryFlutter.init(
+      (options) {
+        options.dsn = kSentryDsn;
+        options.tracesSampleRate = 1.0;
+      },
+    );
+
+    FlutterError.onError = (FlutterErrorDetails details) {
+      if (kDebugMode) {
+        FlutterError.dumpErrorToConsole(details);
+      } else {
+        if (details.stack != null) {
+          Zone.current.handleUncaughtError(details.exception, details.stack!);
+        }
+      }
+    };
+
+    runApp(const MyApp());
+  }).onError((error, stackTrace) async {
+    if (error != null) {
+      await reportError(error, stackTrace);
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -16,27 +46,123 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MyHomePage extends StatelessWidget {
+class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key}) : super(key: key);
+
+  @override
+  State<MyHomePage> createState() => _MyHomePageState();
+}
+
+class _MyHomePageState extends State<MyHomePage> {
+  String text = '';
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: ElevatedButton(
-          child: const Text('에러 발생'),
-          onPressed: () => _occurError(context),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              text,
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(
+              height: 30.0,
+            ),
+            // throw error buttons
+            ElevatedButton(
+              child: const Text('No Exception'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                'Hello',
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('BadRequestException'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                BadRequestException(),
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('ForbiddenException'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                ForbiddenException(),
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('UnauthorisedException'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                UnauthorisedException(),
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('InternalServerErrorException'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                InternalServerErrorException(),
+              ),
+            ),
+            ElevatedButton(
+              child: const Text('FetchDataException'),
+              onPressed: () => callMayCrashyFunction(
+                context,
+                FetchDataException(),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
-}
 
-void _occurError(BuildContext context) async {
-  try {
-    throw NetworkException();
-  } catch (e) {
-    debugPrint(e.toString());
-    await handleError(context, e);
+  // call function. if failure, handle error
+  void callMayCrashyFunction(BuildContext context, Object value) async {
+    final result = await mayCrashyFunction(context, value);
+    if (result is Success<String>) {
+      setState(() {
+        text = result.data;
+      });
+    } else {
+      result as Failure<String>;
+
+      setState(() {
+        text = 'ERROR CODE: ${result.error.code}';
+      });
+
+      reportError(result.error.error, result.error.stackTrace);
+
+      await showErrorDialog(
+        context,
+        result.error,
+        [ErrorDialogActionButton.pop(context)],
+      );
+    }
+  }
+
+  // return result by success or failure
+  Future<Result<String>> mayCrashyFunction(
+    BuildContext context,
+    Object value,
+  ) async {
+    try {
+      // crashy or not
+      if (value is String) {
+        // if done, return Success
+        return Success<String>(value);
+      } else {
+        throw value;
+      }
+    } catch (error, stackTrace) {
+      // if crashy, return Failure
+      final errorEntity = NetworkErrorHandler().getError(
+        error,
+        stackTrace,
+      );
+      return Failure(errorEntity);
+    }
   }
 }
