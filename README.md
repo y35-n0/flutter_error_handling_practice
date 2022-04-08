@@ -1,16 +1,13 @@
-# flutter_test_project
+# flutter_error_handling_practice
 
-A new Flutter project.
+When error catched, popup error dialog with error code and message shows up and report it using sentry.
 
-## Getting Started
+- Sentry
+  - Before applying this code, you should set kSentryDSN for using sentry.
+- (not yet) freezed 
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Reference
+- [Report errors to a service](https://docs.flutter.dev/cookbook/maintenance/error-reporting)
+- [Sentry docs for flutter](https://docs.sentry.io/platforms/flutter/)
+- [Android: Error handling in Clean Architecture](https://medium.cobeisfresh.com/reactive-error-handling-in-an-mvvm-driven-architecture-1ba937a8cd80)
+- [Functional Error Handling in Flutter](https://betterprogramming.pub/functional-error-handling-in-flutter-ac6fcf8ae22b)
