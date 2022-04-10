@@ -93,10 +93,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ElevatedButton(
-              child: const Text('UnauthorisedException'),
+              child: const Text('UnauthorizedException'),
               onPressed: () => callMayCrashyFunction(
                 context,
-                UnauthorisedException(),
+                UnauthorizedException(),
               ),
             ),
             ElevatedButton(
@@ -107,10 +107,10 @@ class _MyHomePageState extends State<MyHomePage> {
               ),
             ),
             ElevatedButton(
-              child: const Text('FetchDataException'),
+              child: const Text('FormatException'),
               onPressed: () => callMayCrashyFunction(
                 context,
-                FetchDataException(),
+                const FormatException(),
               ),
             ),
           ],
@@ -130,14 +130,12 @@ class _MyHomePageState extends State<MyHomePage> {
       result as Failure<String>;
 
       setState(() {
-        text = 'ERROR CODE: ${result.error.code}';
+        text = 'ERROR CODE: ${result.failure.code}';
       });
-
-      reportError(result.error.error, result.error.stackTrace);
 
       await showErrorDialog(
         context,
-        result.error,
+        result.failure,
         [ErrorDialogActionButton.pop(context)],
       );
     }
@@ -158,11 +156,9 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     } catch (error, stackTrace) {
       // if crashy, return Failure
-      final errorEntity = NetworkErrorHandler().getError(
-        error,
-        stackTrace,
-      );
-      return Failure(errorEntity);
+      reportError(error, stackTrace);
+      final failureEntity = NetworkFailureEntity.fromError(error);
+      return Failure(failureEntity);
     }
   }
 }

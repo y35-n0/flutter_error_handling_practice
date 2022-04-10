@@ -1,13 +1,10 @@
-import 'package:flutter_test_project/core/error_handling/error_entities/error_entity.dart';
+import 'package:flutter_test_project/core/error_handling/failure_entities/failure_entities.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-abstract class Result<T> {}
+part 'result.freezed.dart';
 
-class Failure<T> implements Result<T> {
-  Failure(this.error);
-  ErrorEntity error;
-}
-
-class Success<T> implements Result<T> {
-  Success(this.data);
-  T data;
+@freezed
+abstract class Result<T> {
+  const factory Result.success(T data) = Success<T>;
+  const factory Result.failure(FailureEntity failure) = Failure<T>;
 }

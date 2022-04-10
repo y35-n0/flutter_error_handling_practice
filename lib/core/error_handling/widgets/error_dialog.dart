@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_test_project/core/error_handling/error_entities/error_entities.dart';
+import 'package:flutter_test_project/core/error_handling/error_handling.dart';
 
 class ErrorDialog extends StatelessWidget {
   const ErrorDialog({
@@ -8,7 +8,7 @@ class ErrorDialog extends StatelessWidget {
     Key? key,
   }) : super(key: key);
 
-  final ErrorEntity error;
+  final FailureEntity error;
   final List<Widget>? actions;
 
   @override

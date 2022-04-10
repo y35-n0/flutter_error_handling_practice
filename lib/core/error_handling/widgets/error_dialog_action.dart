@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-enum ErrorDialogAction {
-  back,
-  pop,
-  systemPop,
-}
-
 class ErrorDialogActionButton extends TextButton {
   const ErrorDialogActionButton({
     required void Function()? onPressed,
@@ -34,6 +28,7 @@ class ErrorDialogActionButton extends TextButton {
       child: const Text('확인'),
     );
   }
+
   factory ErrorDialogActionButton.systemPop(BuildContext context) {
     return ErrorDialogActionButton(
       onPressed: () => SystemNavigator.pop(),
